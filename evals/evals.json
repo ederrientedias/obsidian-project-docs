@@ -1,0 +1,23 @@
+{
+  "skill_name": "obsidian-project-docs",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Documenta esse projeto no meu Obsidian. O vault fica em ~/Vaults/Dev e quero tudo dentro de Projects/<nome do projeto>. É um app React + Supabase.",
+      "expected_output": "Vault em pt-BR com home, visão geral, arquitetura, notas por módulo/fluxo/entidade/integração, cobertura e estado; nenhuma alteração no código; sem links quebrados; nenhuma env var com valor.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I just inherited this backend service (Node API + Postgres) and need to understand it fast. Give me a survey-level knowledge base in Obsidian at ./vault.",
+      "expected_output": "Survey-tier vault in English: overview, architecture, module index, endpoints, data model, integrations, open questions. No pages/design-system/SEO notes; those are listed as not applicable.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "We merged a big refactor of the billing module last week. Update the project docs in the Obsidian vault instead of redoing everything.",
+      "expected_output": "Update mode: reads Documentation State, diffs since recorded commit, updates only affected notes, bumps last_reviewed, preserves human-written notes, updates state note.",
+      "files": []
+    }
+  ]
+}

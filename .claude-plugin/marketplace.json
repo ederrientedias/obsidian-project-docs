@@ -1,0 +1,16 @@
+{
+  "name": "obsidian-project-docs",
+  "owner": {
+    "name": "Eder Riente"
+  },
+  "metadata": {
+    "description": "Skill that documents a software project in depth as an Obsidian knowledge base."
+  },
+  "plugins": [
+    {
+      "name": "obsidian-project-docs",
+      "source": "./",
+      "description": "Deeply investigate a software project and document it as an interlinked, evidence-backed knowledge base in an Obsidian vault."
+    }
+  ]
+}

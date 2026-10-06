@@ -1,0 +1,8 @@
+{
+  "name": "obsidian-project-docs",
+  "description": "Deeply investigate a software project and document it as an interlinked, evidence-backed knowledge base in an Obsidian vault.",
+  "version": "0.1.0",
+  "author": { "name": "Eder Riente" },
+  "license": "MIT",
+  "keywords": ["obsidian", "documentation", "architecture", "knowledge-base"]
+}

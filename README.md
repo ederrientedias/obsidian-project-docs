@@ -33,7 +33,7 @@ The result is meant to let a developer or an AI agent who has never seen the pro
 Inside Claude Code:
 
 ```text
-/plugin marketplace add ederriente/obsidian-project-docs
+/plugin marketplace add ederrientedias/obsidian-project-docs
 /plugin install obsidian-project-docs@obsidian-project-docs
 ```
 
@@ -42,7 +42,7 @@ Update later with `/plugin marketplace update obsidian-project-docs`.
 ### Claude Code, as a plain skill
 
 ```bash
-git clone https://github.com/ederriente/obsidian-project-docs /tmp/opd
+git clone https://github.com/ederrientedias/obsidian-project-docs /tmp/opd
 cp -r /tmp/opd/skills/obsidian-project-docs ~/.claude/skills/
 ```
 

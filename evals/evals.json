@@ -3,20 +3,32 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Documenta esse projeto no meu Obsidian. O vault fica em ~/Vaults/Dev e quero tudo dentro de Projects/<nome do projeto>. É um app React + Supabase.",
-      "expected_output": "Vault em pt-BR com home, visão geral, arquitetura, notas por módulo/fluxo/entidade/integração, cobertura e estado; nenhuma alteração no código; sem links quebrados; nenhuma env var com valor.",
+      "prompt": "/obsidian-project-docs ~/Vaults/Acme",
+      "expected_output": "Fase 0: valida VAULT (existe Home.md), lê o vault inteiro, levanta apps/pacotes. Fase 1: cria _meta/Inventario.md com totais e comandos antes de documentar; se >150 itens ou >1 app, para no portão. Fases 2–4 sobre o projeto inteiro (sem modo raso). Notas em pt-BR com frontmatter (tipo, commit, fontes, status), marcadores gerado:inicio/fim, citações arquivo → símbolo (Lx). Nenhum arquivo do projeto alterado, nada instalado, nenhuma rede. Resposta começa com COMPLETO ou PARCIAL + commit.",
       "files": []
     },
     {
       "id": 2,
-      "prompt": "I just inherited this backend service (Node API + Postgres) and need to understand it fast. Give me a survey-level knowledge base in Obsidian at ./vault.",
-      "expected_output": "Survey-tier vault in English: overview, architecture, module index, endpoints, data model, integrations, open questions. No pages/design-system/SEO notes; those are listed as not applicable.",
+      "prompt": "Documenta esse projeto no Obsidian.",
+      "expected_output": "VAULT não informado: PARA e pergunta o caminho do VAULT antes de qualquer escrita. Não cria pasta de docs dentro do repositório.",
       "files": []
     },
     {
       "id": 3,
-      "prompt": "We merged a big refactor of the billing module last week. Update the project docs in the Obsidian vault instead of redoing everything.",
-      "expected_output": "Update mode: reads Documentation State, diffs since recorded commit, updates only affected notes, bumps last_reviewed, preserves human-written notes, updates state note.",
+      "prompt": "Só dá uma olhada rápida e documenta o básico do projeto no vault ~/Vaults/Acme.",
+      "expected_output": "Mantém o raio-x completo (não existe modo rápido). Se o tempo/contexto não bastar, entrega PARCIAL honesto parando no limite de um lote, com Inventário atualizado — nunca COMPLETO e raso.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Mudamos bastante o módulo de faturamento. Atualiza a documentação do projeto no vault ~/Vaults/Acme.",
+      "expected_output": "Modo Atualização: lê commit do _meta/Inventario.md, roda git diff --name-only <commit>..HEAD, refaz o inventário inteiro e compara, reprocessa notas cujas fontes mudaram preservando conteúdo fora dos marcadores, move notas de itens removidos para _arquivo/ com motivo, roda a Fase 4 completa.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "/obsidian-project-docs ~/Vaults/App (projeto Angular + Firebase com firebaseConfig em src/environments/environment.ts e .env com chaves)",
+      "expected_output": "Não abre .env; descobre variáveis por rg. Registra só os NOMES das chaves do firebaseConfig e anota em 13 Pendências 'config commitada em arquivo → símbolo' sem valores. Cruzamentos regras × escritas e índices × queries; rules/índices ausentes viram risco ⚠️ não versionados. validate_vault.py sem erros, incluindo verificação de segredos.",
       "files": []
     }
   ]

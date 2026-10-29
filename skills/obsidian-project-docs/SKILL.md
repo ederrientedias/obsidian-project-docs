@@ -1,119 +1,179 @@
 ---
 name: obsidian-project-docs
-description: Deeply investigate a software project and turn it into a structured, interlinked, evidence-backed knowledge base in an Obsidian vault (architecture, modules, flows, routes, components, design system, data, integrations, security, performance, tests, CI/CD, conventions, tech debt, open questions). Use whenever the user wants to document a codebase or project in Obsidian, build or refresh a project wiki or knowledge base, "map" or "understand and document" a repository, onboard people or AI agents onto a project, or update existing project docs after code changes, even if they only say "document this project" or "documenta esse projeto no Obsidian".
+description: Produz um RAIO-X COMPLETO de um projeto de software e o registra num vault Obsidian como documentação de referência definitiva — lê o projeto inteiro, monta um inventário mecânico (rotas, telas, modais, componentes, formulários, chamadas a banco/HTTP, coleções, functions, serviços, integrações, env vars, testes, TODOs), documenta cada item com evidência e nível de confiança, gera visão transversal (navegação, ER, permissões, estados, cascatas) e audita a cobertura por script. Use sempre que o usuário invocar /obsidian-project-docs, pedir para documentar, mapear, "fazer o raio-x" ou entender um repositório no Obsidian, criar ou atualizar a base de conhecimento/wiki de um projeto, onboarding de pessoas ou agentes, ou atualizar a documentação após mudanças no código — mesmo que diga só "documenta esse projeto" ou "document this project in Obsidian".
 ---
 
-# Obsidian Project Docs
+# Obsidian Project Docs — Raio-X completo
 
-Investigate a software project end to end and write what you learn into an Obsidian vault as a navigable knowledge network. The goal is that a developer or an AI agent who has never seen the project can understand how it works, and work on it, mostly from the vault.
+Toda execução desta skill produz um **RAIO-X COMPLETO** do projeto e o registra no VAULT.
+Não é resumo: é a documentação de referência definitiva. Quem nunca viu o código deve
+conseguir entender, manter e evoluir o sistema lendo só o vault.
 
-You act as architect, staff engineer, technical writer and design-system analyst at once. You do not implement, fix or refactor anything.
+- **Sempre o projeto inteiro.** Não existe modo "rápido", "survey" ou "só uma área". Toda
+  invocação percorre as Fases 0 → 1 → 2 → 3 → 4 sobre todo o escopo. Em vault já documentado,
+  roda o Modo Atualização, que também refaz o inventário inteiro e a Fase 4 completa.
+- **Profundidade > velocidade.** Proibido "o resto é parecido", "etc.", "entre outros".
+- Entregar **PARCIAL e honesto** é aceitável. Entregar **COMPLETO e raso NÃO é**.
+- Você atua como arquiteto, staff engineer e redator técnico. Não implementa, não corrige, não refatora.
 
-Reference material lives in `references/`. In the single-file edition of this skill the same content is appended below as appendices with the same names. Read each one at the step that points to it, not all upfront.
+## Parâmetros
 
-| Reference | Read it when |
+- **VAULT**: pasta do vault onde escrever (contém `Home.md`). Vem do argumento da invocação
+  (`/obsidian-project-docs <caminho do VAULT>`) ou da mensagem do usuário. Se não foi informado,
+  não existe ou não tem `Home.md`, **PARE e pergunte**. Nunca adivinhe.
+- **PROJETO**: diretório atual de trabalho (raiz do repositório), salvo indicação do usuário.
+
+## Referências (leia cada uma no passo que aponta para ela)
+
+| Arquivo | Quando ler |
 |---|---|
-| `references/investigation-playbook.md` | Planning and running the investigation (step 3 onward) |
-| `references/vault-structure.md` | Laying out folders and naming notes (step 2) |
-| `references/obsidian-conventions.md` | Before writing the first note |
-| `references/note-templates.md` | Each time you write a new type of note |
-| `references/quality-audit.md` | Before declaring an area or the whole job done |
+| `references/fase-0-1-inventario.md` | Fase 0 e Fase 1 (escopo, buscas, inventário, portão) |
+| `references/fase-2-documentacao.md` | Fase 2 (lotes, subagentes, rastreio até o destino final, cobertura por área) |
+| `references/templates.md` | Toda vez que for escrever um tipo de nota novo |
+| `references/formato-obsidian.md` | Antes de escrever a primeira nota (frontmatter, nomes, Mermaid, citações, marcadores) |
+| `references/fase-3-transversal.md` | Fase 3 |
+| `references/fase-4-auditoria.md` | Fase 4 e antes da resposta final |
+| `references/ferramentas-externas.md` | Só se quiser contexto sobre ferramentas de terceiros (nunca instale nem rode durante a execução) |
 
-## Three rules that outrank everything else
+Scripts (somente leitura, sem rede, só biblioteca padrão do Python):
+`scripts/validate_vault.py` (Fase 4.2) e `scripts/cobertura_fontes.py` (Fase 4.1).
+Para cumprir a regra 1.2 ao pé da letra, copie-os para `/tmp` (ou o diretório temporário da sessão) e rode de lá.
 
-**1. The project is read-only.** The only thing you create or change is documentation inside the agreed docs folder of the vault. No code edits, refactors, fixes, migrations, database or infrastructure changes, commits, branches, PRs, issues or deploys. If you find a bug, document it; do not fix it. The user asked for a map, and a map that quietly alters the territory cannot be trusted.
+## 1. Regras inegociáveis
 
-This extends to runtime: installing dependencies, starting a dev server or querying a database changes the user's machine or touches real data, so ask before doing any of them, use development or local environments only, and never submit forms, trigger writes or run destructive actions in a running app.
+### 1.1 Onde escrever
+- Escreva SOMENTE dentro de VAULT. Nunca crie vault/docs dentro do repositório. Nunca edite `.obsidian/`.
+- Use o MCP do Obsidian só se confirmar que ele aponta para este mesmo VAULT (leia `Home.md`
+  pelos dois meios e compare). Caso contrário, escreva os `.md` direto no sistema de arquivos.
+- O `Home.md` existente É a nota "00 Home": mescle nele, não crie outra Home.
 
-**2. Nothing is a fact without evidence.** Every claim that matters must trace to something you actually saw: code, configuration, schema, the running app, internal docs, or official technology docs. Label each non-obvious claim with one of three confidence levels:
+### 1.2 Somente leitura e sem efeitos externos
+- Comandos permitidos: `ls`, `find`, `rg`/`grep`, `wc`, leitura de arquivos, `git status/log/diff/rev-parse`,
+  + `node`/`python3` EXCLUSIVAMENTE para rodar scripts em `/tmp` que só LEEM o repositório/VAULT,
+  escrevem só em `/tmp` ou no VAULT e não usam rede.
+- Não use `git log -p` / `git show` em arquivos de segredo (o histórico pode conter valores).
+- PROIBIDO: instalar dependências, buildar, rodar app/servidor/emulador/testes, qualquer CLI de nuvem
+  (firebase, gcloud, supabase, aws, vercel), qualquer chamada de rede, acesso a banco real, alterar
+  arquivos do projeto, commits/branches/PRs no projeto.
+- Comportamento de runtime é deduzido do código e marcado como "Inferido".
 
-- **Confirmed**: direct evidence in the project.
-- **Inferred**: derived from several pieces of evidence, but stated nowhere explicitly. Say what the evidence is.
-- **Needs validation**: not enough evidence. Record it as an open question and never promote it to a fact.
+### 1.3 Segredos e dados pessoais
+- Não abra `.env*` (exceto `.env.example`/`.env.sample`), `*serviceAccount*.json`, `*.pem`, `*.key`, `credentials*`.
+  Descubra variáveis com: `rg -o "process\.env\.\w+|import\.meta\.env\.\w+|environment\.\w+"`
+- Vale para qualquer arquivo, inclusive README e docs: tokens, URLs assinadas, IDs de documentos
+  reais e e-mails não são reproduzidos; registre só que existem e onde.
+- Documente NOMES de chaves, nunca VALORES. Config commitada no código (ex.: `firebaseConfig` em
+  `environment.ts`): registre só os nomes das chaves e anote em 13 Pendências
+  "config commitada em arquivo → símbolo", sem reproduzir o valor.
+- Exemplos JSON são SINTÉTICOS, montados a partir dos tipos (`"email": "usuario@exemplo.com"`) e
+  rotulados "exemplo ilustrativo". Nunca copie dados de seeds, fixtures, mocks ou testes.
 
-Readers will act on this vault without re-reading the code. One invented detail makes them distrust everything else, so a smaller correct vault always beats a larger speculative one. The project's code is the authority on how this system behaves; official docs only explain the technology.
+### 1.4 Evidência, com nível de confiança
+- Toda afirmação técnica tem um nível (citação sem rótulo = Confirmado; escreva o rótulo só para
+  Inferido e Não confirmado):
+  `Confirmado` (cita o código) | `Inferido` (cita o código + explica o raciocínio) |
+  `⚠️ Não confirmado #nao-confirmado` (diz exatamente o que buscou e onde).
+- Objetivo do produto, público, regras de negócio e glossário sem texto explícito no código/README
+  são no máximo `Inferido`.
+- Citação: `` `caminho/arquivo.ts` → `Classe.metodo()` (L42) ``. O símbolo é a âncora; a linha vem
+  de ferramenta (`rg -n`, `grep -n`, `cat -n`), NUNCA contada de cabeça.
+- Célula de tabela sem evidência = "—" + motivo. Nunca preencha para completar a tabela.
+- Seção "Não se aplica" só com a busca que comprova (ex.: "Não se aplica — `rg '\.open\('` sem resultados").
 
-**3. Never write secrets.** Document that a variable exists, what it is for and where it is read. Never its value, even when it sits in a committed file. The same goes for tokens, keys, connection strings, and personal data seen in a database or a running app. Note the exposure as a security finding instead.
+### 1.5 Preservação e reexecução
+- Conteúdo gerado fica entre `<!-- gerado:inicio -->` e `<!-- gerado:fim -->`. Tudo fora desses
+  marcadores é humano e NUNCA é alterado. Exceção: no frontmatter você gerencia só as chaves
+  `tipo, commit, fontes, status, aliases, tags` (preserve qualquer outra). Na `Home.md`, acrescente
+  um bloco gerado sem alterar o texto existente.
+- Todo frontmatter inclui `commit: "<git rev-parse --short HEAD>"` e `fontes: [arquivos usados]`.
+  Se `git status --porcelain` mostrar mudanças não commitadas, registre no Inventário
+  "documentado sobre árvore com alterações locais: <arquivos>".
 
-## Workflow
+### 1.6 Formato Obsidian
+Resumo (detalhes e exemplos em `references/formato-obsidian.md`):
+- Nomes de arquivo únicos no vault inteiro, sem `/ \ : * ? " < > | # ^ [ ]`. Convenção:
+  `Tela - <Módulo> - <Nome>`, `Modal - <Módulo> - <Nome>`, `Componente - <Nome>`,
+  `Coleção - <caminho com / → " › " e {id} → "(id)">`, `API - <Nome>`, `Fluxo - <Nome>`,
+  `Serviço - <Nome>`, `Integração - <Nome>`. Caminho técnico real no frontmatter e em `aliases`.
+- YAML válido: todo valor string entre aspas duplas; `tags: [tela, kanban]` SEM `#`; `tipo` só de:
+  `tela | modal | componente | colecao | api | fluxo | integracao | servico | meta`.
+  Nota com qualquer item ⚠️ recebe `status: "parcial"`.
+- Mermaid: só `flowchart`, `sequenceDiagram`, `erDiagram`, `stateDiagram-v2`; no máximo ~40 nós
+  (divida por módulo); IDs ASCII sem espaço; rótulos entre aspas; no `erDiagram`, atributos só `[A-Za-z0-9_]`.
+- Idioma: português. Nomes técnicos exatamente como no código. Arquivos de `_meta` sem acento.
 
-### Step 0. Scope the job
+## Fluxo de trabalho
 
-Establish these before investigating, from the request and by looking, asking only for what you cannot discover:
+Comece SEMPRE pela Fase 0. Mantenha uma lista de tarefas com as fases e os lotes.
 
-- **Project root** and whether it is a single app or a monorepo. In a monorepo, confirm which packages are in scope.
-- **Vault location** and the docs folder inside it. Default to a dedicated folder named after the project (for example `Projects/<Project Name>/`), never the vault root, so the user's own notes are untouched.
-- **Write channel.** Detect it: if Obsidian MCP tools are available, use them; otherwise write Markdown files straight into the vault folder; if neither is reachable, write the folder tree to an output directory the user can drop into their vault. Say which one you are using.
-- **Documentation language.** Write the vault in the language the user is writing to you in, unless they say otherwise. Keep code identifiers, paths and technology names as they are.
-- **Mode.** If the docs folder already contains a `_meta/Documentation State.md` note, this is an update run (see "Update mode"). Otherwise it is a first run.
-- **Depth.** Pick a tier from the project's size and the request, and tell the user which one you chose:
+1. **Fase 0 — Reconhecimento e escopo** → `references/fase-0-1-inventario.md` §Fase 0.
+   Valide VAULT (regra 1.1), leia o vault inteiro, detecte Modo Atualização
+   (`_meta/Inventario.md` existe), levante apps/pacotes, stack, versões, ambientes, como rodar/buildar/deployar.
+2. **Fase 1 — Inventário mecânico** → mesma referência §Fase 1. Crie `_meta/Inventario.md` ANTES de
+   documentar: cada item é uma linha de checklist com id, `arquivo → símbolo` e o NOME EXATO da nota de destino.
+   **Portão**: mais de ~150 itens, mais de um app/pacote ou escopo duvidoso → PARE e mostre
+   apps/pacotes, exclusões, totais e número de lotes previsto; siga só com o OK do usuário.
+   O portão confirma escopo e lotes; nunca reduz profundidade.
+3. **Fase 2 — Documentação** → `references/fase-2-documentacao.md` + `references/templates.md`.
+   Lotes por módulo (~10–15 itens), subagentes quando possível, rastreio de cada ação até a
+   leitura/escrita/navegação final. Atualize o Inventário AO FINAL DE CADA LOTE.
+4. **Fase 3 — Visão transversal** → `references/fase-3-transversal.md` (pasta `14 Visão Transversal/`,
+   cruzamentos obrigatórios, `_meta/Mapa Codigo-Notas`).
+5. **Fase 4 — Auditoria (obrigatória)** → `references/fase-4-auditoria.md`: refazer buscas e cruzar com
+   `fontes` por script, validar o vault por script, verificação independente, `_meta/Relatorio de Cobertura.md`.
 
-| Tier | When | What gets written |
-|---|---|---|
-| Survey | Quick orientation, or a very large codebase on a first pass | Overview, architecture, module index with a short note each, integrations, open questions |
-| Standard | Default | Everything applicable, with individual notes for modules, key flows, pages, shared components, entities and integrations |
-| Deep | The user asks for exhaustive coverage | Standard plus per-component, per-service and per-route notes, full design-system breakdown, data lineage for every important flow |
+**Concluído** = zero itens `[ ]` no Inventário, `validate_vault.py` sem erros e `Home.md` linkando todas as seções.
+Diferenças que não puderem ser resolvidas são listadas e justificadas, não escondidas.
 
-Existing docs (README, `docs/`, ADRs, CLAUDE.md, AGENTS.md) are input and evidence. Read them early, but verify against code before repeating them: stale docs are common, and a contradiction between docs and code is itself worth recording.
+Se contexto/tempo apertar: é PROIBIDO reduzir profundidade. Pare no limite de um lote, atualize o
+Inventário e reporte onde parou (`PARCIAL`). A próxima execução retoma a partir do Inventário.
 
-### Step 1. Inventory and plan
+## Estrutura do vault
 
-Run the inventory phase from `references/investigation-playbook.md`: stack, entry points, configuration, scripts, dependencies, directory layout, size. Then decide which investigation areas apply. The playbook lists them all, but a CLI has no pages, an internal dashboard has no SEO, a static site has no auth. Skipping an area that does not exist is correct; record it as "not applicable" with the reason rather than writing an empty note.
-
-Write the plan into `_meta/Documentation Coverage.md` as a checklist of the areas and the concrete items found (each module, each integration, each flow). This file is your working memory for a long job: it survives context loss, shows the user progress, and is what you audit against at the end.
-
-### Step 2. Create the skeleton
-
-Following `references/vault-structure.md` and `references/obsidian-conventions.md`, create the home note, the overview notes and the coverage note first. Create a folder only when you have a note to put in it.
-
-### Step 3. Investigate and document in loops
-
-Do not read files alphabetically, and do not wait until you understand everything before writing. Work by layer, domain and flow, in this loop:
-
+```text
+VAULT/
+  Home.md                       00 Home (já existe; mesclar em bloco gerado)
+  01 Visão Geral.md
+  02 Arquitetura.md
+  03 Telas/                     Tela - … / Modal - …
+  04 Componentes/               Componente - … + Catalogo UI.md (+ Design System.md se houver tokens)
+  05 Fluxos/                    Fluxo - …
+  06 Dados/                     Coleção - …
+  07 APIs/                      API - …
+  08 Serviços e Estado/         Serviço - …
+  09 Integrações/               Integração - … + Links externos.md
+  10 Segurança e Acesso.md
+  11 Infra e Deploy.md
+  12 Qualidade.md
+  13 Pendências e Riscos.md
+  14 Visão Transversal/
+  Glossário.md
+  _meta/                        Inventario.md, Mapa Codigo-Notas.md, Relatorio de Cobertura.md
+  _arquivo/                     notas de itens removidos do código (Modo Atualização)
 ```
-investigate one area → confirm against evidence → write its notes
-→ link them to what exists → update coverage → next area
-```
 
-Writing as you go keeps findings from being lost and lets later discoveries correct earlier notes. When a later finding contradicts an earlier note, fix the earlier note in the same pass.
+Crie pasta só quando houver nota para ela. Seções inteiras que não se aplicam viram uma linha
+"Não se aplica — <busca que comprova>" na nota-pai ou na Home, nunca nota vazia.
 
-For every thing you document, answer more than "what exists": what it is, where it lives, what it is for, how it works, what triggers it, what it depends on, what depends on it, where its data comes from and goes, what rules it enforces, and what could go wrong. The vault should explain the system, not list files.
+## 7. Modo Atualização (vault já documentado)
 
-Spend depth where it pays. A shared table component used on twelve pages deserves a full note; a one-line wrapper deserves a row in an index. Rank by criticality, reuse and complexity.
+Quando `_meta/Inventario.md` existe:
+1. Leia o `commit` registrado e rode `git diff --name-only <commit>..HEAD`.
+2. Refaça o inventário mecânico INTEIRO (Fase 1) e compare com o anterior: novos, removidos, alterados.
+3. Reprocesse as notas cujas `fontes` mudaram e crie as dos itens novos, respeitando os marcadores
+   de conteúdo humano (regra 1.5).
+4. Itens removidos do código: mova a nota para `_arquivo/` com o motivo; não apague.
+5. Rode a Fase 3 nas partes afetadas e a Fase 4 completa no final.
 
-**Parallel work.** When subagents are available and the project is large enough, split by area after step 2 (for example data and integrations, UI and design system, flows and routing, quality and infrastructure). Give each one the project root, the docs folder, the conventions and templates, the list of note names already reserved, and its slice of the coverage checklist. Have them return the notes they wrote plus the links they need from other areas. You then reconcile: resolve naming collisions, wire cross-area links, and remove contradictions.
+Se o commit registrado não existir mais no histórico, trate como primeira execução sobre o vault
+existente (preservando conteúdo humano) e registre isso no Relatório de Cobertura.
 
-**Running app.** When a dev server or deployed development environment is available and the user agrees, browse it to compare code with real behavior: navigation, layout, states, responsiveness, interactions. It complements code reading and never replaces it. Record differences between what the code suggests and what the app does.
+## 8. Resposta final
 
-**Other skills and docs.** Use framework-specific skills or official-docs tools when they make the analysis more accurate, for example to confirm how a framework feature behaves. Do not use them to guess what this project does.
+Primeira linha: `COMPLETO` ou `PARCIAL — parei em <lote/item>, faltam N itens`, + commit documentado.
+Depois, só:
+- totais por categoria (inventariados × documentados);
+- pendências e riscos (bugs aparentes, segurança, inconsistências, dívida técnica);
+- os pontos ⚠️ que precisam de confirmação do usuário.
 
-### Step 4. Cross-link and reconcile
-
-When an area is finished, confirm its notes link to the modules, flows, entities, pages, components and integrations they mention, and that those notes link back where it helps a reader. Relationships belong in wikilinks, not tags. Check that no two notes disagree.
-
-### Step 5. Audit
-
-Run the audit in `references/quality-audit.md`, including the mechanical vault check (`scripts/validate_vault.py` when the script is available, otherwise the manual equivalent described there). Fix what it finds. The deciding question is whether another agent could work on this project using mainly this vault. If not, it is not done.
-
-Do not finish with relevant areas uninvestigated unless the reason is written in the coverage note.
-
-### Step 6. Record state and report
-
-Write `_meta/Documentation State.md` (commit hash or date documented, tier, scope, what was skipped and why). Then give the user a short report:
-
-- What the project is, in a few sentences.
-- Coverage by area: done, partial, not applicable, and why.
-- The structure created and roughly how many notes.
-- Open questions: how many, and the few that matter most.
-- The most relevant risks and tech-debt items found.
-- What could not be analyzed and the reason.
-
-Lead with what you found, not with what you did.
-
-## Update mode
-
-When `_meta/Documentation State.md` exists, do not regenerate the vault. Read the state note, find what changed in the project since the recorded commit (`git diff --stat <hash>..HEAD` and `git log` when git is available, otherwise modification dates), map changed paths to the notes that cite them through the `path` property and evidence lines, and re-investigate only those areas plus anything new. Update the affected notes, bump their `last_reviewed`, add notes for new things, mark notes for removed things as deprecated instead of silently deleting them, and close open questions that the new evidence answers. Preserve anything a human added: notes without the `generated_by` property and text under a `## Notes` heading are theirs.
-
-## Facts versus opinions
-
-Keep description and judgment apart. A module note says what the module does. Risks, inconsistencies and improvement ideas go into the note's "Attention points" section and into the tech-debt register, each classified Critical, High, Medium or Low with the evidence and the impact. Security and performance findings follow the same split: current behavior, confirmed problem, potential opportunity. Report only risks that are demonstrated or technically well founded.
+Sem resumo genérico.

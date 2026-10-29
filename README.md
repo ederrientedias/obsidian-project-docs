@@ -4,27 +4,28 @@ An agent skill that investigates a software project end to end and writes a stru
 
 The result is meant to let a developer or an AI agent who has never seen the project understand its architecture and work on it without reading the whole codebase first.
 
-## What it produces
+## What it does
 
-- Overview, tech stack, structure and getting-started notes
-- Architecture map with Mermaid diagrams
-- One note per module, business flow, page, key component, data entity and integration
-- Design system (real tokens, patterns, inconsistencies)
-- Data model and data lineage
-- Security, performance, testing, CI/CD and environments
-- Conventions, runbooks and reconstructed architecture decisions
-- Technical debt register with severity
-- Open questions for everything that could not be confirmed
-- A coverage checklist and a state note that enables incremental updates
+Every run is a **full X-ray** of the project: there is no quick or survey mode. The skill reads the whole codebase and goes through five phases:
+
+0. **Recon and scope**: validates the vault (must contain `Home.md`), reads it, finds every app/package, stack and versions.
+1. **Mechanical inventory** (`_meta/Inventario.md`): routes, screens, modals, components, forms, DB and HTTP calls, collections/tables, functions/endpoints, services/stores, integrations, env vars, tests, TODOs, each with `file → symbol` and the exact destination note name. Stops for confirmation when the inventory is large (>~150 items) or has several apps.
+2. **Documentation in batches** (optionally with subagents): one note per screen, modal, shared component, collection, API, service, integration and flow, tracing every action down to the concrete read, write or navigation.
+3. **Cross-cutting view**: navigation map, architecture, ER diagrams, permission and data matrices, entity state machines, user messages, cascades, storage, environments, PWA/SSR, plus mandatory cross-checks (query × index, write × security rule).
+4. **Audit**: independent re-search mapped to each note's `fontes` (`cobertura_fontes.py`), vault validation (`validate_vault.py`), independent verification of the heaviest notes, and a coverage report.
+
+Re-running on a documented vault switches to **update mode**: diff since the recorded commit, full re-inventory, reprocess only notes whose sources changed, archive notes of removed code, full audit again.
+
+The generated vault is written in Portuguese (pt-BR).
 
 ## Principles
 
-- **Read-only**: the project is never modified. Only documentation is written.
-- **Evidence first**: claims cite the file they come from and are labeled Confirmed, Inferred or Needs validation.
-- **No secrets**: variable names and purposes only, never values.
-- **Adaptive**: the investigation adapts to the stack (web app, API, mobile, CLI, library, data pipeline, monorepo) and to a depth tier (Survey, Standard, Deep).
-- **Plain Obsidian**: wikilinks, properties, callouts and Mermaid. No community plugins required.
-- **Language-aware**: the vault is written in the language you talk to the agent in.
+- **Read-only, no side effects**: no installs, builds, app/test runs, cloud CLIs, network or real database access. Runtime behavior is inferred from code and labeled as such.
+- **Evidence with confidence levels**: `file → symbol (Lx)` citations, line numbers from tools; `Inferido` and `⚠️ Não confirmado` labels.
+- **No secrets or personal data**: key names only, synthetic examples only; committed config is flagged as a risk.
+- **Human content preserved**: generated content lives between `<!-- gerado:inicio -->` / `<!-- gerado:fim -->`.
+- **Plain Obsidian**: wikilinks, properties, callouts and Mermaid (flowchart, sequence, ER, state). No community plugins.
+- **Honest partial over shallow complete**: when context runs out it stops at a batch boundary and reports `PARCIAL`.
 
 ## Install
 
@@ -57,18 +58,18 @@ Zip the `skills/obsidian-project-docs` folder and upload it in the skills settin
 Open the agent in the project you want documented and ask, for example:
 
 ```text
-Document this project in my Obsidian vault at ~/Vaults/Work, under Projects/Acme CRM.
+/obsidian-project-docs ~/Vaults/Acme
 ```
 
 ```text
-Documenta esse projeto no Obsidian, nível deep, e use o app rodando em localhost:4200 para conferir as telas.
+Documenta esse projeto no Obsidian, vault em ~/Vaults/Acme.
 ```
 
 ```text
-The code changed a lot since last month. Update the project docs in Obsidian.
+O código mudou bastante desde o mês passado. Atualiza a documentação no vault ~/Vaults/Acme.
 ```
 
-The skill detects how to write to the vault: Obsidian MCP tools when present, direct files in the vault folder otherwise, or an output folder you can drop into the vault.
+The vault folder must already exist and contain a `Home.md`; if it is missing the skill stops and asks. It writes through the Obsidian MCP only when it can confirm the MCP points to the same vault, otherwise straight to the files.
 
 ## Layout
 
@@ -79,21 +80,27 @@ The skill detects how to write to the vault: Obsidian MCP tools when present, di
 skills/obsidian-project-docs/
   SKILL.md                            workflow and core rules
   references/
-    investigation-playbook.md         what to look for in each area
-    vault-structure.md                folders, naming, home and meta notes
-    obsidian-conventions.md           frontmatter, links, evidence, diagrams
-    note-templates.md                 templates per note type
-    quality-audit.md                  audit before finishing
+    fase-0-1-inventario.md            recon, scope, mandatory searches, inventory, gate
+    fase-2-documentacao.md            batches, subagents, trace-to-effect, per-area coverage
+    templates.md                      templates per note type, inventory and reports
+    formato-obsidian.md               names, frontmatter, markers, citations, Mermaid
+    fase-3-transversal.md             cross-cutting notes and mandatory cross-checks
+    fase-4-auditoria.md               audit steps and completion criteria
+    ferramentas-externas.md           curated third-party tools (ideas only, never run)
   scripts/
-    validate_vault.py                 broken links, orphans, frontmatter, secrets
+    validate_vault.py                 links, orphans, YAML, names, inventory, markers, Mermaid, secrets
+    cobertura_fontes.py               re-runs the searches and lists files no note cites
 evals/
   evals.json                          test prompts for iterating on the skill
 ```
 
 ## Validate a generated vault
 
+Both scripts are read-only, network-free and standard-library only.
+
 ```bash
-python skills/obsidian-project-docs/scripts/validate_vault.py "~/Vaults/Work/Projects/Acme CRM" --vault-root ~/Vaults/Work
+python3 -I skills/obsidian-project-docs/scripts/validate_vault.py ~/Vaults/Acme
+python3 -I skills/obsidian-project-docs/scripts/cobertura_fontes.py /path/to/project ~/Vaults/Acme
 ```
 
 ## Contributing

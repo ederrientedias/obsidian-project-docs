@@ -18,9 +18,12 @@ conseguir entender, manter e evoluir o sistema lendo só o vault.
 
 ## Parâmetros
 
-- **VAULT**: pasta do vault onde escrever (contém `Home.md`). Vem do argumento da invocação
-  (`/obsidian-project-docs <caminho do VAULT>`) ou da mensagem do usuário. Se não foi informado,
-  não existe ou não tem `Home.md`, **PARE e pergunte**. Nunca adivinhe.
+- **VAULT**: pasta do vault onde escrever (contém `Home.md`; em vault configurado, `<Projeto> Home.md`).
+  Vem do argumento da invocação (`/obsidian-project-docs <caminho do VAULT>`) ou da mensagem do usuário.
+  Se não foi informado, não existe ou não tem a Home, **PARE e pergunte**. Nunca adivinhe.
+- **Vault configurado**: se a raiz do vault (primeiro diretório acima do VAULT com `.obsidian/`) tem
+  `00 Sistema/projetos.yaml`, leia `references/vault-configurado.md` na Fase 0 e siga-o. Ele substitui
+  nome da Home, prefixo dos nomes de nota, valores de `tipo`, frontmatter extra e escritas de fim de execução.
 - **PROJETO**: diretório atual de trabalho (raiz do repositório), salvo indicação do usuário.
 
 ## Referências (leia cada uma no passo que aponta para ela)
@@ -33,6 +36,7 @@ conseguir entender, manter e evoluir o sistema lendo só o vault.
 | `references/formato-obsidian.md` | Antes de escrever a primeira nota (frontmatter, nomes, Mermaid, citações, marcadores) |
 | `references/fase-3-transversal.md` | Fase 3 |
 | `references/fase-4-auditoria.md` | Fase 4 e antes da resposta final |
+| `references/vault-configurado.md` | Fase 0, só se o vault tiver `00 Sistema/projetos.yaml` (substitui convenções de nome, Home e `tipo`) |
 | `references/ferramentas-externas.md` | Só se quiser contexto sobre ferramentas de terceiros (nunca instale nem rode durante a execução) |
 
 Scripts (somente leitura, sem rede, só biblioteca padrão do Python):
@@ -45,7 +49,9 @@ Para cumprir a regra 1.2 ao pé da letra, copie-os para `/tmp` (ou o diretório 
 - Escreva SOMENTE dentro de VAULT. Nunca crie vault/docs dentro do repositório. Nunca edite `.obsidian/`.
 - Use o MCP do Obsidian só se confirmar que ele aponta para este mesmo VAULT (leia `Home.md`
   pelos dois meios e compare). Caso contrário, escreva os `.md` direto no sistema de arquivos.
-- O `Home.md` existente É a nota "00 Home": mescle nele, não crie outra Home.
+- O `Home.md` existente (ou `<Projeto> Home.md`, em vault configurado) É a nota "00 Home": mescle nela, não crie outra Home.
+- Exceção, só em vault configurado: as escritas de fim de execução listadas em `references/vault-configurado.md`
+  (linha no diário, `desatualizado: true` no Conhecimento, `cerebro reindexar`, decisões/aprendizados exigidos pelo `CLAUDE.md` do vault).
 
 ### 1.2 Somente leitura e sem efeitos externos
 - Comandos permitidos: `ls`, `find`, `rg`/`grep`, `wc`, leitura de arquivos, `git status/log/diff/rev-parse`,
@@ -96,7 +102,9 @@ Resumo (detalhes e exemplos em `references/formato-obsidian.md`):
   `Coleção - <caminho com / → " › " e {id} → "(id)">`, `API - <Nome>`, `Fluxo - <Nome>`,
   `Serviço - <Nome>`, `Integração - <Nome>`. Caminho técnico real no frontmatter e em `aliases`.
 - YAML válido: todo valor string entre aspas duplas; `tags: [tela, kanban]` SEM `#`; `tipo` só de:
-  `tela | modal | componente | colecao | api | fluxo | integracao | servico | meta`.
+  `tela | modal | componente | colecao | api | fluxo | integracao | servico | meta`
+  (em vault configurado: `visao-geral`, `arquitetura` e `modulo` no lugar de `meta`/`servico` conforme
+  `references/vault-configurado.md`).
   Nota com qualquer item ⚠️ recebe `status: "parcial"`.
 - Mermaid: só `flowchart`, `sequenceDiagram`, `erDiagram`, `stateDiagram-v2`; no máximo ~40 nós
   (divida por módulo); IDs ASCII sem espaço; rótulos entre aspas; no `erDiagram`, atributos só `[A-Za-z0-9_]`.
@@ -122,7 +130,7 @@ Comece SEMPRE pela Fase 0. Mantenha uma lista de tarefas com as fases e os lotes
 5. **Fase 4 — Auditoria (obrigatória)** → `references/fase-4-auditoria.md`: refazer buscas e cruzar com
    `fontes` por script, validar o vault por script, verificação independente, `_meta/Relatorio de Cobertura.md`.
 
-**Concluído** = zero itens `[ ]` no Inventário, `validate_vault.py` sem erros e `Home.md` linkando todas as seções.
+**Concluído** = zero itens `[ ]` no Inventário, `validate_vault.py` sem erros e a Home linkando todas as seções.
 Diferenças que não puderem ser resolvidas são listadas e justificadas, não escondidas.
 
 Se contexto/tempo apertar: é PROIBIDO reduzir profundidade. Pare no limite de um lote, atualize o
@@ -132,7 +140,8 @@ Inventário e reporte onde parou (`PARCIAL`). A próxima execução retoma a par
 
 ```text
 VAULT/
-  Home.md                       00 Home (já existe; mesclar em bloco gerado)
+  Home.md                       00 Home (já existe; mesclar em bloco gerado; vault configurado: <Projeto> Home.md
+                                e todas as notas com prefixo "<Projeto> - ", ver vault-configurado.md)
   01 Visão Geral.md
   02 Arquitetura.md
   03 Telas/                     Tela - … / Modal - …

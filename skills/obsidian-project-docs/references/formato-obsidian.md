@@ -40,6 +40,9 @@ aliases: ["/customers/:id"]
 ```
 
 - `tipo` só de: `tela | modal | componente | colecao | api | fluxo | integracao | servico | meta`.
+  Vault configurado (`00 Sistema/projetos.yaml`): Home e `01 Visão Geral` → `visao-geral`,
+  `02 Arquitetura` → `arquitetura`, `Serviço - …` → `modulo`; mais `projeto` e `data` no frontmatter,
+  prefixo `<Projeto> - ` nos nomes e linha de navegação como citação. Ver `vault-configurado.md`.
 - `tags` SEM `#`.
 - `commit` e `fontes` obrigatórios em TODA nota gerada.
 - `status`: `"completo"` ou `"parcial"`; nota com qualquer item ⚠️ → `"parcial"`.
@@ -54,7 +57,7 @@ aliases: ["/customers/:id"]
 <!-- gerado:fim -->
 ```
 Tudo fora deles é humano e NUNCA é alterado. Em reexecução, substitua só o que está entre eles.
-Na `Home.md`, acrescente um bloco gerado ao final sem tocar no texto existente.
+Na Home (`Home.md` ou `<Projeto> Home.md`), acrescente um bloco gerado ao final sem tocar no texto existente.
 
 ## Evidência e confiança
 - Sem rótulo = Confirmado (há citação).

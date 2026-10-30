@@ -103,6 +103,15 @@ python3 -I skills/obsidian-project-docs/scripts/validate_vault.py ~/Vaults/Acme
 python3 -I skills/obsidian-project-docs/scripts/cobertura_fontes.py /path/to/project ~/Vaults/Acme
 ```
 
+In a vault whose root has `00 Sistema/projetos.yaml` (a "configured vault"), the skill follows
+`references/vault-configurado.md`: the home note is `<Project> Home.md`, every note name gets the
+`<Project> - ` prefix, overview/architecture/module notes use `tipo` `visao-geral`/`arquitetura`/`modulo`
+so the vault's own tooling (`cerebro conhecimento`) can read them. Pass the vault root and home:
+
+```bash
+python3 -I skills/obsidian-project-docs/scripts/validate_vault.py "~/Vault/02 Projetos/Acme" --vault-root ~/Vault --home "Acme Home"
+```
+
 ## Contributing
 
 Issues and pull requests are welcome. Good contributions: stack-specific investigation hints, new note templates, validator checks, and eval cases showing where the skill falls short. Keep `SKILL.md` lean and put detail in `references/`.

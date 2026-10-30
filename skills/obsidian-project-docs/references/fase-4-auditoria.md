@@ -47,5 +47,7 @@ Gere `_meta/Relatorio de Cobertura.md`: totais inventariados × documentados (co
 informação humana.
 
 ## Critério de conclusão
-Concluído = zero itens `[ ]`, `validate_vault.py` sem erros e `Home.md` linkando todas as seções.
+Concluído = zero itens `[ ]`, `validate_vault.py` sem erros e a Home linkando todas as seções.
+Em vault configurado, rode o validador com `--vault-root <raiz> --home "<Projeto> Home"` e faça as escritas
+de fim de execução de `vault-configurado.md`.
 Diferenças que não puderem ser resolvidas são listadas e justificadas, não escondidas.

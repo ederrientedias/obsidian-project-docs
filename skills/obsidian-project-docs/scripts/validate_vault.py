@@ -15,7 +15,7 @@ Avisos:
   itens `[ ]` pendentes no Inventário.
 
 Uso:
-  python3 -I validate_vault.py <VAULT> [--vault-root <raiz>] [--home Home] [--json]
+  python3 -I validate_vault.py <VAULT> [--vault-root <raiz>] [--home "<Projeto> Home"] [--json]
 """
 from __future__ import annotations
 
@@ -27,7 +27,9 @@ import unicodedata
 from collections import defaultdict
 from pathlib import Path
 
-TIPOS = {"tela", "modal", "componente", "colecao", "api", "fluxo", "integracao", "servico", "meta"}
+TIPOS = {"tela", "modal", "componente", "colecao", "api", "fluxo", "integracao", "servico", "meta",
+         # vault configurado (00 Sistema/projetos.yaml): ver references/vault-configurado.md
+         "visao-geral", "arquitetura", "modulo"}
 FORBIDDEN_NAME = re.compile(r'[/\\:*?"<>|#^\[\]]')
 WIKILINK = re.compile(r"(!?)\[\[([^\]\[]+?)\]\]")
 FENCE = re.compile(r"^\s*(```|~~~)\s*([\w-]*)")
@@ -217,7 +219,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("vault", type=Path, help="pasta do VAULT (contém Home.md)")
     ap.add_argument("--vault-root", type=Path, help="raiz do vault Obsidian, se VAULT for subpasta (unicidade de nomes)")
-    ap.add_argument("--home", default="Home", help="nome da nota Home (padrão: Home)")
+    ap.add_argument("--home", default=None,
+                    help="nome da nota Home (padrão: Home; sem Home.md, a única '* Home.md' na raiz do VAULT)")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
@@ -226,6 +229,9 @@ def main() -> int:
         print(f"Não é pasta: {vault}", file=sys.stderr)
         return 2
     root = (args.vault_root.expanduser().resolve() if args.vault_root else vault)
+    if args.home is None:
+        candidatas = sorted(p.stem for p in vault.glob("* Home.md"))
+        args.home = "Home" if (vault / "Home.md").exists() or len(candidatas) != 1 else candidatas[0]
 
     def md_files(base: Path):
         return sorted(p for p in base.rglob("*.md") if not ({".obsidian", ".trash"} & set(p.parts)))

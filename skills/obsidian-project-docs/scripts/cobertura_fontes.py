@@ -84,7 +84,7 @@ def cited_paths(vault: Path) -> set[str]:
         if ".obsidian" in p.parts:
             continue
         text = p.read_text(encoding="utf-8", errors="replace")
-        if p.stem.lower().startswith("mapa codigo-notas"):
+        if "mapa codigo-notas" in p.stem.lower():  # aceita prefixo de projeto ("<Projeto> - Mapa Codigo-Notas")
             cited.update(path_like.findall(text))
         if not text.startswith("---"):
             continue
@@ -139,7 +139,9 @@ def main() -> int:
                 hits[cat][rel] = n
 
     def covered(rel: str) -> bool:
-        return rel in cited or any(rel.endswith("/" + c) or c.endswith("/" + rel) for c in cited if "/" in c)
+        # rel.lstrip("."): a extração de caminhos perde o ponto inicial de pastas como `.github/`
+        return rel in cited or rel.lstrip(".") in cited or any(
+            rel.endswith("/" + c) or c.endswith("/" + rel) for c in cited if "/" in c)
 
     report = {}
     for cat in patterns:
